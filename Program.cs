@@ -1,14 +1,30 @@
 ﻿using System;
 using System.IO;
+using System.Text.RegularExpressions;
 
 namespace ACLFormatter
 {
     class Program
     {
-        static string ReadFile(string sFilePath)
+        static string ReadFile(string filePath)
         {
-            string str = File.ReadAllText(sFilePath);
-            return str;
+            string res = File.ReadAllText(filePath);
+            return res;
+        }
+
+        static string Template2XML(string text)
+        {
+            string sResult;
+            string pattern = "{% (for|if)([^}]*)%}";
+            Regex rgx = new Regex(pattern);
+            sResult = rgx.Replace(text, "<$1 value=\"$2\">");
+
+            rgx = new Regex("{% end((for|if)[^}]*)%}");
+            sResult = rgx.Replace(sResult, "</$2>");
+
+            rgx = new Regex("{% (assign)([^}]*)%}");
+            sResult = rgx.Replace(sResult, "<$1 value=\"$2\" ></$1>");
+            return sResult;
         }
 
         static void Main(string[] args)
@@ -31,7 +47,7 @@ namespace ACLFormatter
                     }
                     else
                     {
-                        Console.WriteLine(ReadFile(args[0]));
+                        Console.WriteLine(Template2XML(ReadFile(args[0])));
                     }
                 }
             }
