@@ -2,6 +2,7 @@
 using System.IO;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Xml;
 
 namespace ACLFormatter
 {
@@ -37,6 +38,29 @@ namespace ACLFormatter
             return sResult;
         }
 
+        static string FormatXML(string text)
+        {
+            XmlDocument xd = new XmlDocument();
+            xd.LoadXml(text);
+            StringBuilder sb = new StringBuilder();
+            StringWriter sw = new StringWriter(sb);
+            XmlTextWriter xtw = null;
+            try
+            {
+                xtw = new XmlTextWriter(sw);
+                xtw.Formatting = Formatting.Indented;
+                xtw.Indentation = 2;
+                xtw.IndentChar = ' ';
+                xd.WriteTo(xtw);
+            }
+            finally
+            {
+                if (xtw != null)
+                    xtw.Close();
+            }
+            return sb.ToString();
+        }
+
         static void Main(string[] args)
         {
             if (args.Length == 0)
@@ -57,7 +81,7 @@ namespace ACLFormatter
                     }
                     else
                     {
-                        string output = Template2XML(ReadFile(args[0]));
+                        string output = FormatXML(Template2XML(ReadFile(args[0])));
                         string outputFile = args[0].Replace(".xml", "_out.xml");
                         WriteFile(outputFile, output);
                         Console.WriteLine("Success, output to: " + outputFile);
