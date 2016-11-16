@@ -38,6 +38,21 @@ namespace ACLFormatter
             return sResult;
         }
 
+        static string XML2Template(string text)
+        {
+            string sResult;
+            string pattern = "<(for|if) value=\"([^>]*)\">";
+            Regex rgx = new Regex(pattern);
+            sResult = rgx.Replace(text, "{% $1$2%}");
+
+            rgx = new Regex("</(for|if)>");
+            sResult = rgx.Replace(sResult, "{% end$1 %}");
+
+            rgx = new Regex("<assign value=\"([^>]*)\">[^>]*</assign>");
+            sResult = rgx.Replace(sResult, "{% assign$1%}");
+            return sResult;
+        }
+
         static string FormatXML(string text)
         {
             XmlDocument xd = new XmlDocument();
@@ -81,7 +96,7 @@ namespace ACLFormatter
                     }
                     else
                     {
-                        string output = FormatXML(Template2XML(ReadFile(args[0])));
+                        string output = XML2Template(FormatXML(Template2XML(ReadFile(args[0]))));
                         string outputFile = args[0].Replace(".xml", "_out.xml");
                         WriteFile(outputFile, output);
                         Console.WriteLine("Success, output to: " + outputFile);
