@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Text;
 using System.Text.RegularExpressions;
 
 namespace ACLFormatter
@@ -10,6 +11,15 @@ namespace ACLFormatter
         {
             string res = File.ReadAllText(filePath);
             return res;
+        }
+
+        static public void WriteFile(string filePath, string text)
+        {
+            FileStream fs = new FileStream(filePath, FileMode.Create);
+            StreamWriter sw = new StreamWriter(fs, Encoding.Default);
+            sw.Write(text);
+            sw.Close();
+            fs.Close();
         }
 
         static string Template2XML(string text)
@@ -47,7 +57,10 @@ namespace ACLFormatter
                     }
                     else
                     {
-                        Console.WriteLine(Template2XML(ReadFile(args[0])));
+                        string output = Template2XML(ReadFile(args[0]));
+                        string outputFile = args[0].Replace(".xml", "_out.xml");
+                        WriteFile(outputFile, output);
+                        Console.WriteLine("Success, output to: " + outputFile);
                     }
                 }
             }
